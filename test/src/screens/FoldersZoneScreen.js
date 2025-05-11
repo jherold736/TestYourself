@@ -1,38 +1,74 @@
-import React, { useState } from 'react';
-import { SafeAreaView, View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Modal } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  SafeAreaView,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+  Modal,
+  Alert
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
-const FoldersZoneScreen = () => {
+const FoldersZoneScreen = ({ route, navigation }) => {
+  const insets = useSafeAreaInsets();
   const [folders, setFolders] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
 
-  // ➡️ Funkcja dodająca nowy folder
+  // 📥 ODBIÓR FISZEK Z Creation Zone
+  const incomingFlashcards = route.params?.flashcards || [];
+
+  // 📦 Pokazujemy modal tylko jeśli mamy fiszki do zapisania
+  useEffect(() => {
+    if (incomingFlashcards.length > 0) {
+      setModalVisible(true);
+    }
+  }, [incomingFlashcards]);
+
+  // ➕ DODAJEMY FOLDER Z FISZKAMI (jeśli istnieją)
   const addFolder = () => {
     if (newFolderName.trim() !== '') {
-      setFolders([...folders, { id: Date.now(), name: newFolderName }]);
+      const newFolder = {
+        id: Date.now(),
+        name: newFolderName,
+        flashcards: incomingFlashcards, // 📎 zapisujemy fiszki!
+      };
+      setFolders([...folders, newFolder]);
       setNewFolderName('');
       setModalVisible(false);
+      Alert.alert('Dodano folder', `Fiszki zostały przypisane do folderu "${newFolderName}".`);
     }
   };
 
-  // ➡️ Funkcja usuwająca folder
+  // ❌ USUŃ FOLDER
   const deleteFolder = (id) => {
     setFolders(folders.filter((folder) => folder.id !== id));
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.grid}>
-        {/* ➡️ Renderowanie folderów */}
+      <ScrollView contentContainerStyle={[styles.grid, { paddingTop: insets.top + 10 }]}>
+        {/* 📁 Renderowanie folderów */}
         {folders.map((folder) => (
           <View key={folder.id} style={styles.folderContainer}>
-            <TouchableOpacity style={styles.folder}>
+            <TouchableOpacity
+              style={styles.folder}
+              onPress={() =>
+                navigation.navigate('Folder Details', {
+                  folderName: folder.name,        // 👉 Przekazujemy nazwę
+                  flashcards: folder.flashcards || [], // 👉 Przekazujemy fiszki
+                })
+              }
+            >
               <Ionicons name="folder" size={40} color="#000" />
               <Text style={styles.folderName}>{folder.name}</Text>
             </TouchableOpacity>
 
-            {/* ➡️ Przycisk kosza do usuwania folderu */}
+            {/* 🗑 Przycisk usuwania */}
             <TouchableOpacity
               style={styles.deleteButton}
               onPress={() => deleteFolder(folder.id)}
@@ -42,14 +78,14 @@ const FoldersZoneScreen = () => {
           </View>
         ))}
 
-        {/* ➡️ Przycisk dodania nowego folderu */}
+        {/* ➕ Przycisk dodania folderu manualnie */}
         <TouchableOpacity style={styles.addFolder} onPress={() => setModalVisible(true)}>
           <Ionicons name="add-circle" size={50} color="#000" />
           <Text style={styles.addText}>Dodaj folder</Text>
         </TouchableOpacity>
       </ScrollView>
 
-      {/* ➡️ Modal do wpisania nowej nazwy folderu */}
+      {/* 📋 MODAL do dodania nowego folderu */}
       <Modal
         visible={modalVisible}
         transparent
@@ -76,22 +112,18 @@ const FoldersZoneScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FDBF4C',
-  },
+  container: { flex: 1, backgroundColor: '#FDBF4C' },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
     padding: 20,
-    paddingTop: 20,    //  dodane nowe!
     paddingBottom: 100,
   },
   folderContainer: {
     width: '40%',
     margin: 10,
-    position: 'relative', //  Dzięki temu kosz jest absolutnie ustawiony!
+    position: 'relative',
   },
   folder: {
     backgroundColor: '#fff',
@@ -112,7 +144,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 15,
     padding: 2,
-    zIndex: 10,
   },
   addFolder: {
     width: '40%',
@@ -121,13 +152,11 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 15,
     alignItems: 'center',
-    justifyContent: 'center',
   },
   addText: {
     marginTop: 10,
     fontWeight: '600',
     color: '#000',
-    textAlign: 'center',
   },
   modalBackground: {
     flex: 1,
@@ -170,5 +199,4 @@ const styles = StyleSheet.create({
 });
 
 export default FoldersZoneScreen;
-
 

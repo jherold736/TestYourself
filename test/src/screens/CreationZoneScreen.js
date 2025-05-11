@@ -1,38 +1,49 @@
 import React, { useState } from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import Flashcard from '../components/Flashcards'; // Nasz komponent fiszki
+import Flashcard from '../components/Flashcards';
 
 const CreationZoneScreen = ({ navigation }) => {
-  const [flashcards, setFlashcards] = useState([{ id: Date.now() }]);
+  const insets = useSafeAreaInsets();
+  const [flashcards, setFlashcards] = useState([{ id: Date.now(), front: '', back: '' }]);
 
   const addFlashcard = () => {
-    setFlashcards([...flashcards, { id: Date.now() + Math.random() }]);
+    setFlashcards([...flashcards, { id: Date.now() + Math.random(), front: '', back: '' }]);
   };
 
   const saveFlashcards = () => {
     console.log('Zapisano fiszki:', flashcards);
-    setFlashcards([{ id: Date.now() }]);
-    navigation.navigate('Folders Zone'); // ➡️ Przekierowanie do ekranu folderów
+    navigation.navigate('Folders Zone', { flashcards });
+    setFlashcards([{ id: Date.now(), front: '', back: '' }]);
   };
 
   const deleteFlashcard = (id) => {
     setFlashcards(flashcards.filter((card) => card.id !== id));
   };
 
+  const updateFlashcard = (id, front, back) => {
+    setFlashcards(prev =>
+      prev.map(card => (card.id === id ? { ...card, front, back } : card))
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView 
-        contentContainerStyle={styles.scroll}
+      <ScrollView
+        contentContainerStyle={[styles.scroll, { paddingTop: insets.top + 10 }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* ➡️ Renderowanie fiszek */}
         {flashcards.map((card) => (
           <View key={card.id} style={styles.flashcardRow}>
             <View style={styles.cardWrapper}>
-              <Flashcard />
+              <Flashcard
+                front={card.front}
+                back={card.back}
+                onUpdate={(front, back) => updateFlashcard(card.id, front, back)}
+              />
             </View>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.deleteButton}
               onPress={() => deleteFlashcard(card.id)}
             >
@@ -41,12 +52,10 @@ const CreationZoneScreen = ({ navigation }) => {
           </View>
         ))}
 
-        {/* ➡️ Przycisk dodawania nowej fiszki */}
         <TouchableOpacity style={styles.addButton} onPress={addFlashcard}>
           <Ionicons name="add-circle" size={50} color="#000" />
         </TouchableOpacity>
 
-        {/* ➡️ Przycisk zapisywania fiszek */}
         <TouchableOpacity style={styles.saveButton} onPress={saveFlashcards}>
           <Text style={styles.saveButtonText}>Zapisz fiszki</Text>
         </TouchableOpacity>
@@ -56,16 +65,12 @@ const CreationZoneScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FDBF4C',
-  },
+  container: { flex: 1, backgroundColor: '#FDBF4C' },
   scroll: {
     padding: 20,
     alignItems: 'center',
     justifyContent: 'flex-start',
     flexGrow: 1,
-    paddingTop: 20,    //  dodane nowe!
     paddingBottom: 100,
   },
   flashcardRow: {
@@ -98,6 +103,7 @@ const styles = StyleSheet.create({
 });
 
 export default CreationZoneScreen;
+
 
 
 

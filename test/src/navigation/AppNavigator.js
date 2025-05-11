@@ -8,6 +8,8 @@ import AuthScreen from '../screens/AuthScreen';
 // ❗ Importujemy teraz nasz dolny pasek (Main Tabs)
 import MainTabsNavigator from '../navigation/MainTabsNavigator';
 
+import FolderDetailScreen from '../screens/FolderDetailScreen';
+
 const Stack = createNativeStackNavigator();
 
 function AppNavigator() {
@@ -34,6 +36,13 @@ function AppNavigator() {
           name="Main"
           component={MainTabsNavigator} // 🚀 zamiast pojedynczych ekranów wstawiamy cały pasek nawigacyjny
           options={{ headerShown: false }}
+        />
+
+        {/* ➕ 4. Szczegóły folderu */}
+        <Stack.Screen
+          name="Folder Details"
+          component={FolderDetailScreen}
+          options={{ title: 'Szczegóły folderu' }}
         />
 
         {/*  TE EKRANY USUWAMY bo są teraz wewnątrz MainTabsNavigator:

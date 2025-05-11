@@ -1,40 +1,45 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Modal,
-  TextInput,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput } from 'react-native';
 import FlipCard from 'react-native-flip-card';
 import { Ionicons } from '@expo/vector-icons';
 
 const FolderDetailsScreen = ({ route }) => {
   const { name, flashcards: initialFlashcards } = route.params;
   const [flashcards, setFlashcards] = useState(initialFlashcards);
-  const [editingCard, setEditingCard] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [editedFront, setEditedFront] = useState('');
-  const [editedBack, setEditedBack] = useState('');
+  const [currentCard, setCurrentCard] = useState(null);
+  const [frontText, setFrontText] = useState('');
+  const [backText, setBackText] = useState('');
 
-  const openEditModal = (card, index) => {
-    setEditingCard(index);
-    setEditedFront(card.front);
-    setEditedBack(card.back);
+  const openEditModal = (card = null) => {
+    if (card) {
+      setCurrentCard(card);
+      setFrontText(card.front);
+      setBackText(card.back);
+    } else {
+      setCurrentCard(null);
+      setFrontText('');
+      setBackText('');
+    }
     setModalVisible(true);
   };
 
-  const saveEdits = () => {
-    const updated = [...flashcards];
-    updated[editingCard] = {
-      ...updated[editingCard],
-      front: editedFront,
-      back: editedBack,
-    };
-    setFlashcards(updated);
+  const saveCard = () => {
+    if (currentCard) {
+      setFlashcards(flashcards.map(c =>
+        c.id === currentCard.id ? { ...c, front: frontText, back: backText } : c
+      ));
+    } else {
+      setFlashcards([
+        ...flashcards,
+        { id: Date.now(), front: frontText, back: backText }
+      ]);
+    }
     setModalVisible(false);
+  };
+
+  const deleteCard = (id) => {
+    setFlashcards(flashcards.filter(c => c.id !== id));
   };
 
   return (
@@ -43,11 +48,11 @@ const FolderDetailsScreen = ({ route }) => {
         {flashcards.map((card, index) => (
           <View key={index} style={styles.cardWrapper}>
             <FlipCard
+              style={styles.card}
               friction={10}
               clickable={true}
               flipHorizontal={true}
               flipVertical={false}
-              style={styles.card}
             >
               <View style={styles.face}>
                 <Text style={styles.label}>Słowo / Zwrot</Text>
@@ -58,16 +63,24 @@ const FolderDetailsScreen = ({ route }) => {
                 <Text style={styles.cardText}>{card.back || 'Brak tłumaczenia'}</Text>
               </View>
             </FlipCard>
-            <TouchableOpacity
-              style={styles.editIcon}
-              onPress={() => openEditModal(card, index)}
-            >
-              <Ionicons name="pencil" size={24} color="black" />
-            </TouchableOpacity>
+
+            <View style={styles.actions}>
+              <TouchableOpacity onPress={() => openEditModal(card)}>
+                <Ionicons name="create-outline" size={26} color="black" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => deleteCard(card.id)}>
+                <Ionicons name="trash" size={26} color="black" style={{ marginLeft: 10 }} />
+              </TouchableOpacity>
+            </View>
           </View>
         ))}
+
+        <TouchableOpacity style={styles.addButton} onPress={() => openEditModal(null)}>
+          <Ionicons name="add-circle" size={50} color="#000" />
+        </TouchableOpacity>
       </ScrollView>
 
+      {/* Modal edycji */}
       <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
@@ -75,16 +88,16 @@ const FolderDetailsScreen = ({ route }) => {
             <TextInput
               style={styles.input}
               placeholder="Słowo / Zwrot"
-              value={editedFront}
-              onChangeText={setEditedFront}
+              value={frontText}
+              onChangeText={setFrontText}
             />
             <TextInput
               style={styles.input}
               placeholder="Tłumaczenie"
-              value={editedBack}
-              onChangeText={setEditedBack}
+              value={backText}
+              onChangeText={setBackText}
             />
-            <TouchableOpacity style={styles.saveButton} onPress={saveEdits}>
+            <TouchableOpacity style={styles.saveButton} onPress={saveCard}>
               <Text style={styles.saveButtonText}>Zapisz</Text>
             </TouchableOpacity>
           </View>
@@ -95,24 +108,27 @@ const FolderDetailsScreen = ({ route }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FDBF4C',
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
-  cardsContainer: {
-    alignItems: 'center',
-    paddingBottom: 40,
-  },
+  container: { flex: 1, backgroundColor: '#FDBF4C', paddingTop: 40, paddingHorizontal: 20 },
+  title: { fontSize: 24, fontWeight: '700', textAlign: 'center', marginBottom: 20 },
+
   cardWrapper: {
-    position: 'relative',
-    marginBottom: 20,
+  alignItems: 'center',
+  marginBottom: 20,
+  width: '100%',
   },
+
   card: {
     width: 300,
     height: 200,
   },
+
+  cardsContainer: {
+  paddingBottom: 60,
+  alignItems: 'center',
+  paddingHorizontal: 20,
+  },
+
+
   face: {
     flex: 1,
     backgroundColor: '#fff',
@@ -129,24 +145,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
-  label: {
-    fontSize: 14,
-    color: '#888',
-    marginBottom: 6,
-  },
-  cardText: {
-    fontSize: 18,
-    color: '#000',
-    textAlign: 'center',
-  },
-  editIcon: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-  },
+  label: { fontSize: 14, color: '#888', marginBottom: 6 },
+  cardText: { fontSize: 18, color: '#000', textAlign: 'center' },
+  actions: { flexDirection: 'row', marginTop: 10 },
+  addButton: { marginTop: 10 },
   modalBackground: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -157,19 +162,15 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     alignItems: 'center',
   },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 10,
-  },
+  modalTitle: { fontSize: 18, fontWeight: '700', marginBottom: 10 },
   input: {
     width: '100%',
+    borderColor: 'gray',
     borderWidth: 1,
-    borderColor: '#ccc',
     borderRadius: 10,
     paddingHorizontal: 10,
-    paddingVertical: 8,
     marginBottom: 10,
+    height: 40,
   },
   saveButton: {
     backgroundColor: '#000',
@@ -177,13 +178,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     borderRadius: 30,
   },
-  saveButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
+  saveButtonText: { color: '#fff', fontWeight: '600' },
 });
 
 export default FolderDetailsScreen;
+
 
 
 

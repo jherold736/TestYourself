@@ -1,11 +1,16 @@
-import React, { useState } from 'react';
+// src/components/Flashcards.js
+import React, { useState, useEffect } from 'react';
 import { View, TextInput, StyleSheet, TouchableWithoutFeedback, Text } from 'react-native';
 import FlipCard from 'react-native-flip-card';
 
-const Flashcard = () => {
-  const [frontText, setFrontText] = useState('');
-  const [backText, setBackText] = useState('');
+const Flashcard = ({ front = '', back = '', onUpdate = () => {} }) => {
+  const [frontText, setFrontText] = useState(front);
+  const [backText, setBackText] = useState(back);
   const [flipped, setFlipped] = useState(false);
+
+  useEffect(() => {
+    onUpdate(frontText, backText);
+  }, [frontText, backText]);
 
   return (
     <TouchableWithoutFeedback onPress={() => setFlipped(!flipped)}>
@@ -27,7 +32,7 @@ const Flashcard = () => {
             onChangeText={setFrontText}
             placeholder="Wpisz słowo..."
             placeholderTextColor="#999"
-            multiline={true}
+            multiline
             textAlignVertical="top"
           />
         </View>
@@ -41,7 +46,7 @@ const Flashcard = () => {
             onChangeText={setBackText}
             placeholder="Wpisz tłumaczenie..."
             placeholderTextColor="#999"
-            multiline={true}
+            multiline
             textAlignVertical="top"
           />
         </View>
@@ -82,6 +87,7 @@ const styles = StyleSheet.create({
 });
 
 export default Flashcard;
+
 
 
 

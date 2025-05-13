@@ -31,3 +31,14 @@ export const loginUser = async (email, password) => {
   }
 };
 
+export const saveFlashcards = async (flashcards) => {
+  try {
+    const response = await api.post('/flashcards', { flashcards });
+    return response.data;
+  } catch (error) {
+    console.error('Błąd zapisu fiszek:', error?.response?.data || error.message);
+    throw error?.response?.data || "Błąd zapisu fiszek";
+  }
+};
+
+

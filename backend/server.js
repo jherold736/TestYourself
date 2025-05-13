@@ -6,6 +6,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const Flashcard = require('./models/Flashcard'); // 📁 import modelu fiszki
 const app = express();
 
 app.use(express.json()); // Middleware do obsługi JSON
@@ -53,6 +54,20 @@ app.post('/login', async (req, res) => {
     res.status(500).send(error.message);
   }
 });
+
+// Zapis fiszek
+app.post('/flashcards', async (req, res) => {
+  try {
+    const { flashcards } = req.body;
+    const saved = await Flashcard.insertMany(flashcards);
+    console.log(` Zapisano ${saved.length} fiszek do bazy danych`);
+    res.status(201).json(saved);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Błąd zapisu fiszek' });
+  }
+});
+
 
 // Ustawienie portu serwera
 const port = process.env.PORT || 3000;

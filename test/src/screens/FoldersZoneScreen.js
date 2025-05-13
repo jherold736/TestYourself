@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { saveFlashcards } from '../api';
 
 const FoldersZoneScreen = ({ route, navigation }) => {
   const insets = useSafeAreaInsets();
@@ -30,13 +31,27 @@ const FoldersZoneScreen = ({ route, navigation }) => {
   }, [incomingFlashcards]);
 
   // ➕ DODAJEMY FOLDER Z FISZKAMI (jeśli istnieją)
-  const addFolder = () => {
-    if (newFolderName.trim() !== '') {
+  const addFolder = async () => {
+  if (newFolderName.trim() !== '') {
+    const flashcardsWithFolder = incomingFlashcards.map(card => ({
+      ...card,
+      folderName: newFolderName
+    }));
+
+    try {
+      console.log("Próbuję zapisać fiszki do bazy...");
+      await saveFlashcards(flashcardsWithFolder); // zapis do MongoDB
+      console.log(` Wysłano ${flashcardsWithFolder.length} fiszek do bazy`);
+    } catch (err) {
+      console.error(' Błąd przy zapisie fiszek:', err);
+    }
+      
       const newFolder = {
         id: Date.now(),
         name: newFolderName,
         flashcards: incomingFlashcards, // 📎 zapisujemy fiszki!
       };
+
       setFolders([...folders, newFolder]);
       setNewFolderName('');
       setModalVisible(false);
@@ -44,7 +59,7 @@ const FoldersZoneScreen = ({ route, navigation }) => {
     }
   };
 
-  // ❌ USUŃ FOLDER
+  //  USUŃ FOLDER
   const deleteFolder = (id) => {
     setFolders(folders.filter((folder) => folder.id !== id));
   };
@@ -68,7 +83,7 @@ const FoldersZoneScreen = ({ route, navigation }) => {
               <Text style={styles.folderName}>{folder.name}</Text>
             </TouchableOpacity>
 
-            {/* 🗑 Przycisk usuwania */}
+            {/*  Przycisk usuwania */}
             <TouchableOpacity
               style={styles.deleteButton}
               onPress={() => deleteFolder(folder.id)}
@@ -78,7 +93,7 @@ const FoldersZoneScreen = ({ route, navigation }) => {
           </View>
         ))}
 
-        {/* ➕ Przycisk dodania folderu manualnie */}
+        {/*  Przycisk dodania folderu manualnie */}
         <TouchableOpacity style={styles.addFolder} onPress={() => setModalVisible(true)}>
           <Ionicons name="add-circle" size={50} color="#000" />
           <Text style={styles.addText}>Dodaj folder</Text>

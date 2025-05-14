@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput } from 'react-native';
 import FlipCard from 'react-native-flip-card';
 import { Ionicons } from '@expo/vector-icons';
+import { saveFlashcards } from '../api';
 
 const FolderDetailsScreen = ({ route }) => {
-  const { name, flashcards: initialFlashcards } = route.params;
+  const { folderName, flashcards: initialFlashcards } = route.params;
   const [flashcards, setFlashcards] = useState(initialFlashcards);
   const [modalVisible, setModalVisible] = useState(false);
   const [currentCard, setCurrentCard] = useState(null);
@@ -24,16 +25,29 @@ const FolderDetailsScreen = ({ route }) => {
     setModalVisible(true);
   };
 
-  const saveCard = () => {
+  const saveCard = async () => {
     if (currentCard) {
-      setFlashcards(flashcards.map(c =>
-        c.id === currentCard.id ? { ...c, front: frontText, back: backText } : c
-      ));
+      setFlashcards(prev =>
+        prev.map(c => (c.id === currentCard.id ? { ...c, front: frontText, back: backText } : c))
+      );
     } else {
-      setFlashcards([
-        ...flashcards,
-        { id: Date.now(), front: frontText, back: backText }
-      ]);
+      const newCard = {
+        id: Date.now(),
+        front: frontText,
+        back: backText,
+        folderName, //  dodaj folderName
+      };
+
+      console.log(' Dodaję fiszkę do folderu:', folderName);
+
+      setFlashcards(prev => [...prev, newCard]);
+
+      try {
+        await saveFlashcards([newCard]); //  ZAPISZ DO BAZY
+        console.log('Nowa fiszka zapisana do bazy.');
+      } catch (err) {
+        console.error('Błąd zapisu fiszki:', err);
+      }
     }
     setModalVisible(false);
   };

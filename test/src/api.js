@@ -1,11 +1,24 @@
 // src/api.js
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_URL = 'http://192.168.160.169:3000'; // Upewnij się że masz poprawne IP!
 
 export const api = axios.create({
   baseURL: API_URL,
 });
+
+// PRZECHWYTUJEMY ŻĄDANIA I DODAJEMY TOKEN
+api.interceptors.request.use(
+  async (config) => {
+    const token = await AsyncStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`; // ⬅️ Dodajemy token
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 export const registerUser = async (email, password) => {
   try {
@@ -40,5 +53,7 @@ export const saveFlashcards = async (flashcards) => {
     throw error?.response?.data || "Błąd zapisu fiszek";
   }
 };
+
+
 
 

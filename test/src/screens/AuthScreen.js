@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Keyboa
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { loginUser, registerUser } from '../api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Walidacja logowania
 const loginValidationSchema = Yup.object().shape({
@@ -25,8 +26,9 @@ const AuthScreen = ({ navigation }) => {
     try {
       if (isLogin) {
         const data = await loginUser(values.email, values.password);
+        await AsyncStorage.setItem('token', data.token); // ZAPISUJEMY TOKEN
         console.log('Zalogowano:', data);
-        navigation.navigate('Main'); // ➡️ przekierowanie
+        navigation.navigate('Main'); //  przekierowanie
       } else {
         await registerUser(values.email, values.password);
         alert("Rejestracja zakończona! Możesz się zalogować.");

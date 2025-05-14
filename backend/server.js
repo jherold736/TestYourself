@@ -1,6 +1,19 @@
 require('dotenv').config();
 console.log("JWT Secret:", process.env.JWT_SECRET);
 
+const auth = (req, res, next) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  if (!token) return res.status(401).send('Brak tokenu');
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded; // 👈 dodajemy użytkownika do żądania
+    next();
+  } catch (err) {
+    res.status(400).send('Nieprawidłowy token');
+  }
+};
+
 
 const express = require('express');
 const mongoose = require('mongoose');
@@ -55,12 +68,17 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// Zapis fiszek
-app.post('/flashcards', async (req, res) => {
+// Zapis fiszek - teraz kazda fiszka bedzie z przypisanym uzytkownikiem
+app.post('/flashcards', auth, async (req, res) => {
   try {
-    const { flashcards } = req.body;
-    const saved = await Flashcard.insertMany(flashcards);
-    console.log(` Zapisano ${saved.length} fiszek do bazy danych`);
+    console.log(' Użytkownik z tokena:', req.user);
+    const userId = req.user._id;
+    const flashcardsWithUser = req.body.flashcards.map(card => ({
+      ...card,
+      userId
+    }));
+
+    const saved = await Flashcard.insertMany(flashcardsWithUser);
     res.status(201).json(saved);
   } catch (err) {
     console.error(err);

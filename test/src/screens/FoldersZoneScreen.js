@@ -13,6 +13,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { saveFlashcards, saveFolder } from '../api';
+import { getFolders } from '../api';
 
 const FoldersZoneScreen = ({ route, navigation }) => {
   const insets = useSafeAreaInsets();
@@ -20,10 +21,25 @@ const FoldersZoneScreen = ({ route, navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
 
-  // 📥 ODBIÓR FISZEK Z Creation Zone
+useEffect(() => {
+  const fetchFolders = async () => {
+    try {
+      const fetchedFolders = await getFolders();
+      setFolders(fetchedFolders);
+      console.log('Pobrano foldery z bazy:', fetchedFolders);
+    } catch (err) {
+      console.error('Błąd pobierania folderów:', err);
+    }
+  };
+
+  fetchFolders();
+}, []);
+
+
+  // ODBIÓR FISZEK Z Creation Zone
   const incomingFlashcards = route.params?.flashcards || [];
 
-  // 📦 Pokazujemy modal tylko jeśli mamy fiszki do zapisania
+  // Pokazujemy modal tylko jeśli mamy fiszki do zapisania
   useEffect(() => {
     if (incomingFlashcards.length > 0) {
       setModalVisible(true);
@@ -50,7 +66,7 @@ const addFolder = async () => {
 
       // ➡️ 4. Dodajemy nowy folder do lokalnego state:
       const newFolder = {
-        id: savedFolder._id,
+        _id: savedFolder._id,
         name: savedFolder.name,
         flashcards: incomingFlashcards, // lokalny state, OK
       };
@@ -68,7 +84,7 @@ const addFolder = async () => {
 
   //  USUŃ FOLDER
   const deleteFolder = (id) => {
-    setFolders(folders.filter((folder) => folder.id !== id));
+    setFolders(folders.filter((folder) => folder._id !== id));
   };
 
   return (
@@ -76,7 +92,7 @@ const addFolder = async () => {
       <ScrollView contentContainerStyle={[styles.grid, { paddingTop: insets.top + 10 }]}>
         {/* 📁 Renderowanie folderów */}
         {folders.map((folder) => (
-          <View key={folder.id} style={styles.folderContainer}>
+          <View key={folder._id} style={styles.folderContainer}>
             <TouchableOpacity
               style={styles.folder}
               onPress={() =>
@@ -93,7 +109,7 @@ const addFolder = async () => {
             {/*  Przycisk usuwania */}
             <TouchableOpacity
               style={styles.deleteButton}
-              onPress={() => deleteFolder(folder.id)}
+              onPress={() => deleteFolder(folder._id)}
             >
               <Ionicons name="trash" size={24} color="black" />
             </TouchableOpacity>

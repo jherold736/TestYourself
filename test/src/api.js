@@ -54,7 +54,6 @@ export const saveFlashcards = async (flashcards) => {
   }
 };
 
-
 export const saveFolder = async (name) => {
   try {
     const response = await api.post('/folders', { name });
@@ -64,5 +63,29 @@ export const saveFolder = async (name) => {
     throw error?.response?.data || "Błąd zapisu folderu";
   }
 };
+
+//funkcja do pobrania folderow
+export const getFolders = async () => {
+  try {
+    const response = await api.get('/folders');
+    console.log('Pobrano foldery:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Błąd pobierania folderów:', error?.response?.data || error.message);
+    throw error?.response?.data || "Błąd pobierania folderów";
+  }
+};
+
+//Korzystamy tu z axiosa, token doda się sam (bo mamy interceptor)
+export const getFlashcards = async (folderName) => {
+  try {
+    const response = await api.get(`/flashcards/${folderName}`);
+    return response.data;
+  } catch (error) {
+    console.error('Błąd pobierania fiszek:', error?.response?.data || error.message);
+    throw error?.response?.data || "Błąd pobierania fiszek";
+  }
+};
+
 
 

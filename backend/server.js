@@ -93,13 +93,39 @@ app.post('/folders', auth, async (req, res) => {
     const userId = req.user._id;
     const { name } = req.body;
 
-    const folder = new Folder({ name, userId });
-    await folder.save();
+    const newFolder = new Folder({ name, userId });
+    const savedFolder = await newFolder.save();
 
-    res.status(201).json(folder);
+    res.status(201).json(savedFolder);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Błąd zapisu folderu' });
+  }
+});
+
+// Pobieranie folderów dla zalogowanego usera
+app.get('/folders', auth, async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const folders = await Folder.find({ userId });
+    res.json(folders);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Błąd pobierania folderów' });
+  }
+});
+
+app.get('/flashcards/:folderName', auth, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { folderName } = req.params;
+
+    const flashcards = await Flashcard.find({ userId, folderName });
+    res.json(flashcards);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Błąd pobierania fiszek' });
   }
 });
 

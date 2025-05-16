@@ -1,16 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput } from 'react-native';
 import FlipCard from 'react-native-flip-card';
 import { Ionicons } from '@expo/vector-icons';
 import { saveFlashcards } from '../api';
+import { getFlashcards } from '../api';
 
 const FolderDetailsScreen = ({ route }) => {
-  const { folderName, flashcards: initialFlashcards } = route.params;
-  const [flashcards, setFlashcards] = useState(initialFlashcards);
+  const { folderName } = route.params;
+  const [flashcards, setFlashcards] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [currentCard, setCurrentCard] = useState(null);
   const [frontText, setFrontText] = useState('');
   const [backText, setBackText] = useState('');
+
+  useEffect(() => {
+  const fetchFlashcards = async () => {
+    try {
+      const fetchedFlashcards = await getFlashcards(folderName); // name to folderName z route.params
+      setFlashcards(fetchedFlashcards);
+      console.log('Pobrano fiszki:', fetchedFlashcards);
+    } catch (err) {
+      console.error('Błąd przy pobieraniu fiszek:', err);
+    }
+  };
+
+  fetchFlashcards();
+}, [folderName]);
 
   const openEditModal = (card = null) => {
     if (card) {

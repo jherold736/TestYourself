@@ -19,7 +19,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const Flashcard = require('./models/Flashcard'); // 📁 import modelu fiszki
+const Flashcard = require('./models/Flashcard'); // import modelu fiszki
+const Folder = require('./models/Folder');
 const app = express();
 
 app.use(express.json()); // Middleware do obsługi JSON
@@ -83,6 +84,22 @@ app.post('/flashcards', auth, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Błąd zapisu fiszek' });
+  }
+});
+
+//endpoint do zapisu folderow 
+app.post('/folders', auth, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { name } = req.body;
+
+    const folder = new Folder({ name, userId });
+    await folder.save();
+
+    res.status(201).json(folder);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Błąd zapisu folderu' });
   }
 });
 

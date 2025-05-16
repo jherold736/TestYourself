@@ -55,5 +55,14 @@ export const saveFlashcards = async (flashcards) => {
 };
 
 
+export const saveFolder = async (name) => {
+  try {
+    const response = await api.post('/folders', { name });
+    return response.data;
+  } catch (error) {
+    console.error('Błąd zapisu folderu:', error?.response?.data || error.message);
+    throw error?.response?.data || "Błąd zapisu folderu";
+  }
+};
 
 

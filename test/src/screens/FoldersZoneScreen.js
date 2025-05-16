@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { saveFlashcards } from '../api';
+import { saveFlashcards, saveFolder } from '../api';
 
 const FoldersZoneScreen = ({ route, navigation }) => {
   const insets = useSafeAreaInsets();
@@ -30,34 +30,41 @@ const FoldersZoneScreen = ({ route, navigation }) => {
     }
   }, [incomingFlashcards]);
 
-  // ➕ DODAJEMY FOLDER Z FISZKAMI (jeśli istnieją)
-  const addFolder = async () => {
+  //  DODAJEMY FOLDER Z FISZKAMI (jeśli istnieją)
+const addFolder = async () => {
   if (newFolderName.trim() !== '') {
-    const flashcardsWithFolder = incomingFlashcards.map(card => ({
-      ...card,
-      folderName: newFolderName
-    }));
-
     try {
-      console.log("Próbuję zapisać fiszki do bazy...");
-      await saveFlashcards(flashcardsWithFolder); // zapis do MongoDB
-      console.log(` Wysłano ${flashcardsWithFolder.length} fiszek do bazy`);
-    } catch (err) {
-      console.error(' Błąd przy zapisie fiszek:', err);
-    }
-      
+      // ➡️ 1. Zapis folderu do bazy danych:
+      const savedFolder = await saveFolder(newFolderName);
+      console.log('Folder zapisany do bazy:', savedFolder);
+
+      // ➡️ 2. Przygotowanie fiszek z folderName:
+      const flashcardsWithFolder = incomingFlashcards.map(card => ({
+        ...card,
+        folderName: savedFolder.name
+      }));
+
+      // ➡️ 3. Zapis fiszek do bazy:
+      await saveFlashcards(flashcardsWithFolder);
+      console.log(`Wysłano ${flashcardsWithFolder.length} fiszek do bazy`);
+
+      // ➡️ 4. Dodajemy nowy folder do lokalnego state:
       const newFolder = {
-        id: Date.now(),
-        name: newFolderName,
-        flashcards: incomingFlashcards, // 📎 zapisujemy fiszki!
+        id: savedFolder._id,
+        name: savedFolder.name,
+        flashcards: incomingFlashcards, // lokalny state, OK
       };
 
       setFolders([...folders, newFolder]);
       setNewFolderName('');
       setModalVisible(false);
-      Alert.alert('Dodano folder', `Fiszki zostały przypisane do folderu "${newFolderName}".`);
+      Alert.alert('Dodano folder', `Folder "${newFolderName}" został zapisany do bazy.`);
+
+    } catch (err) {
+      console.error('Błąd przy zapisie folderu/fiszek:', err);
     }
-  };
+  }
+};
 
   //  USUŃ FOLDER
   const deleteFolder = (id) => {

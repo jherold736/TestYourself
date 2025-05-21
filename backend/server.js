@@ -130,6 +130,39 @@ app.get('/flashcards/:folderName', auth, async (req, res) => {
 });
 
 
+// Usuwanie fiszki
+app.delete('/flashcards/:id', auth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user._id;
+
+    const deleted = await Flashcard.findOneAndDelete({ _id: id, userId });
+    if (!deleted) return res.status(404).json({ message: 'Fiszka nie znaleziona' });
+
+    res.json({ message: 'Fiszka usunięta' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Błąd przy usuwaniu fiszki' });
+  }
+});
+
+// USUWANIE folderu po ID
+app.delete('/folders/:id', auth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user._id;
+
+    const deleted = await Folder.findOneAndDelete({ _id: id, userId });
+
+    if (!deleted) return res.status(404).json({ message: 'Folder nie znaleziony' });
+
+    res.json({ message: 'Folder usunięty' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Błąd przy usuwaniu folderu' });
+  }
+});
+
 // Ustawienie portu serwera
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Server running on port ${port}`));

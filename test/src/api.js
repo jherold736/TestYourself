@@ -87,5 +87,26 @@ export const getFlashcards = async (folderName) => {
   }
 };
 
+export const deleteFlashcard = async (id) => {
+  try {
+    const response = await api.delete(`/flashcards/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Błąd usuwania fiszki:', error?.response?.data || error.message);
+    throw error?.response?.data || "Błąd usuwania fiszki";
+  }
+};
+
+export const deleteFolder = async (folderId) => {
+  try {
+    const response = await api.delete(`/folders/${folderId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Błąd usuwania folderu:', error?.response?.data || error.message);
+    throw error;
+  }
+};
+
+
 
 

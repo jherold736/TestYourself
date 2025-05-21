@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { saveFlashcards, saveFolder } from '../api';
 import { getFolders } from '../api';
+import { deleteFolder as deleteFolderFromApi } from '../api';
 
 const FoldersZoneScreen = ({ route, navigation }) => {
   const insets = useSafeAreaInsets();
@@ -83,9 +84,17 @@ const addFolder = async () => {
 };
 
   //  USUŃ FOLDER
-  const deleteFolder = (id) => {
-    setFolders(folders.filter((folder) => folder._id !== id));
-  };
+const deleteFolder = async (id) => {
+  try {
+    await deleteFolderFromApi(id); // 🧠 usuwa z bazy
+    setFolders(prev => prev.filter(folder => folder._id !== id)); // 🔄 lokalnie usuwa z widoku
+    console.log('Folder usunięty:', id);
+  } catch (err) {
+    console.error('Błąd usuwania folderu:', err);
+    Alert.alert('Błąd', 'Nie udało się usunąć folderu.');
+  }
+};
+
 
   return (
     <SafeAreaView style={styles.container}>

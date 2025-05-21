@@ -4,6 +4,7 @@ import FlipCard from 'react-native-flip-card';
 import { Ionicons } from '@expo/vector-icons';
 import { saveFlashcards } from '../api';
 import { getFlashcards } from '../api';
+import { deleteFlashcard } from '../api';
 
 const FolderDetailsScreen = ({ route }) => {
   const { folderName } = route.params;
@@ -67,9 +68,16 @@ const FolderDetailsScreen = ({ route }) => {
     setModalVisible(false);
   };
 
-  const deleteCard = (id) => {
-    setFlashcards(flashcards.filter(c => c.id !== id));
+  const deleteCard = async (id) => {
+    try {
+      await deleteFlashcard(id); // 🗑 usuwa z MongoDB
+      setFlashcards(prev => prev.filter(c => c._id !== id)); // 🔁 odświeżenie widoku
+      console.log('Fiszka usunięta z bazy');
+    } catch (err) {
+      console.error('Błąd przy usuwaniu fiszki:', err);
+    }
   };
+
 
   return (
     <View style={styles.container}>
@@ -97,7 +105,7 @@ const FolderDetailsScreen = ({ route }) => {
               <TouchableOpacity onPress={() => openEditModal(card)}>
                 <Ionicons name="create-outline" size={26} color="black" />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => deleteCard(card.id)}>
+              <TouchableOpacity onPress={() => deleteCard(card._id)}>
                 <Ionicons name="trash" size={26} color="black" style={{ marginLeft: 10 }} />
               </TouchableOpacity>
             </View>

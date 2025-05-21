@@ -107,6 +107,15 @@ export const deleteFolder = async (folderId) => {
   }
 };
 
+export const updateFlashcard = async (id, front, back) => {
+  try {
+    const response = await api.put(`/flashcards/${id}`, { front, back });
+    return response.data;
+  } catch (error) {
+    console.error('Błąd aktualizacji fiszki:', error?.response?.data || error.message);
+    throw error?.response?.data || 'Błąd aktualizacji fiszki';
+  }
+};
 
 
 

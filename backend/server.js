@@ -146,6 +146,28 @@ app.delete('/flashcards/:id', auth, async (req, res) => {
   }
 });
 
+// Aktualizacja fiszki
+app.put('/flashcards/:id', auth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { front, back } = req.body;
+    const userId = req.user._id;
+
+    const updated = await Flashcard.findOneAndUpdate(
+      { _id: id, userId },
+      { front, back },
+      { new: true }
+    );
+
+    if (!updated) return res.status(404).json({ message: 'Fiszka nie znaleziona' });
+
+    res.json(updated);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Błąd aktualizacji fiszki' });
+  }
+});
+
 // USUWANIE folderu + fiszek powiązanych z tym folderem
 app.delete('/folders/:id', auth, async (req, res) => {
   try {

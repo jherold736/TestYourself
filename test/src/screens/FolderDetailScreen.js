@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { saveFlashcards } from '../api';
 import { getFlashcards } from '../api';
 import { deleteFlashcard } from '../api';
+import { updateFlashcard } from '../api';
 
 const FolderDetailsScreen = ({ route }) => {
   const { folderName } = route.params;
@@ -43,9 +44,15 @@ const FolderDetailsScreen = ({ route }) => {
 
   const saveCard = async () => {
     if (currentCard) {
-      setFlashcards(prev =>
-        prev.map(c => (c.id === currentCard.id ? { ...c, front: frontText, back: backText } : c))
-      );
+      try {
+        const updatedCard = await updateFlashcard(currentCard._id, frontText, backText);
+        setFlashcards(prev =>
+          prev.map(c => (c._id === currentCard._id ? updatedCard : c))
+        );
+        console.log('Zaktualizowano fiszkę w bazie:', updatedCard);
+      } catch (err) {
+        console.error('Błąd aktualizacji fiszki:', err);
+      }
     } else {
       const newCard = {
         id: Date.now(),

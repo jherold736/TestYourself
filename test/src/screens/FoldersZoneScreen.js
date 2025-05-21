@@ -86,7 +86,7 @@ const addFolder = async () => {
   //  USUŃ FOLDER
 const deleteFolder = async (id) => {
   try {
-    await deleteFolderFromApi(id); // 🧠 usuwa z bazy
+    await deleteFolderFromApi(id); //  usuwa z bazy
     setFolders(prev => prev.filter(folder => folder._id !== id)); // 🔄 lokalnie usuwa z widoku
     console.log('Folder usunięty:', id);
   } catch (err) {

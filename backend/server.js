@@ -146,20 +146,26 @@ app.delete('/flashcards/:id', auth, async (req, res) => {
   }
 });
 
-// USUWANIE folderu po ID
+// USUWANIE folderu + fiszek powiązanych z tym folderem
 app.delete('/folders/:id', auth, async (req, res) => {
   try {
-    const { id } = req.params;
     const userId = req.user._id;
+    const folderId = req.params.id;
 
-    const deleted = await Folder.findOneAndDelete({ _id: id, userId });
+    // 1. Znajdź folder, żeby znać jego nazwę
+    const folder = await Folder.findOne({ _id: folderId, userId });
+    if (!folder) return res.status(404).json({ message: 'Folder nie znaleziony' });
 
-    if (!deleted) return res.status(404).json({ message: 'Folder nie znaleziony' });
+    // 2. Usuń fiszki powiązane z nazwą folderu i użytkownikiem
+    await Flashcard.deleteMany({ folderName: folder.name, userId });
 
-    res.json({ message: 'Folder usunięty' });
+    // 3. Usuń folder
+    await Folder.deleteOne({ _id: folderId });
+
+    res.status(200).json({ message: 'Folder i powiązane fiszki zostały usunięte' });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Błąd przy usuwaniu folderu' });
+    res.status(500).json({ message: 'Błąd usuwania folderu/fiszek' });
   }
 });
 

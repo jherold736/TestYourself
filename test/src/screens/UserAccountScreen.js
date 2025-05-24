@@ -1,13 +1,26 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 
-const UserAccountScreen = ({ navigation }) => {
-  const email = 'uzytkownik@mail.com'; // 🔁 Zmień na dynamiczne dane, jeśli chcesz
+const UserAccountScreen = () => {
+  const navigation = useNavigation();
+  const [email, setEmail] = useState('uzytkownik@mail.com'); // Tymczasowo na sztywno
 
-  const handleLogout = () => {
-    // Tu dodasz wylogowywanie (np. usunięcie tokena)
-    console.log('Wyloguj użytkownika');
+  // W przyszłości: pobierz email z tokena lub osobno z backendu
+
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('token');
+      console.log('Użytkownik wylogowany');
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Auth' }],
+      });
+    } catch (err) {
+      console.error('Błąd wylogowania:', err);
+    }
   };
 
   const handleChangePassword = () => {
@@ -43,7 +56,7 @@ const UserAccountScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FDBF4C', //  Kolor z aplikacji
+    backgroundColor: '#FDBF4C', 
     alignItems: 'center',
     justifyContent: 'flex-start',
     paddingTop: 60,

@@ -27,6 +27,7 @@ const AuthScreen = ({ navigation }) => {
       if (isLogin) {
         const data = await loginUser(values.email, values.password);
         await AsyncStorage.setItem('token', data.token); // ZAPISUJEMY TOKEN
+        await AsyncStorage.setItem('userEmail', values.email); // zapisz email
         console.log('Zalogowano:', data);
         navigation.navigate('Main'); //  przekierowanie
       } else {

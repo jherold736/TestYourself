@@ -6,9 +6,18 @@ import { useNavigation } from '@react-navigation/native';
 
 const UserAccountScreen = () => {
   const navigation = useNavigation();
-  const [email, setEmail] = useState('uzytkownik@mail.com'); // Tymczasowo na sztywno
+  const [email, setEmail] = useState('');
 
-  // W przyszłości: pobierz email z tokena lub osobno z backendu
+  useEffect(() => {
+    const fetchEmail = async () => {
+      const storedEmail = await AsyncStorage.getItem('userEmail');
+      if (storedEmail) {
+        setEmail(storedEmail);
+      }
+    };
+
+    fetchEmail();
+  }, []);
 
   const handleLogout = async () => {
     try {

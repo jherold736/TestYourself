@@ -191,6 +191,29 @@ app.delete('/folders/:id', auth, async (req, res) => {
   }
 });
 
+//endpoint do zmiany hasla do konta uzytkownika
+
+app.put('/change-password', auth, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { currentPassword, newPassword } = req.body;
+
+    const user = await User.findById(userId);
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) return res.status(400).json({ message: 'Obecne hasło jest nieprawidłowe' });
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({ message: 'Hasło zostało zmienione' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Błąd zmiany hasła' });
+  }
+});
+
 // Ustawienie portu serwera
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Server running on port ${port}`));

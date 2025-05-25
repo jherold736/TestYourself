@@ -117,5 +117,19 @@ export const updateFlashcard = async (id, front, back) => {
   }
 };
 
+//funkcja change password
+export const changePassword = async (currentPassword, newPassword) => {
+  try {
+    const response = await api.put('/change-password', {
+      currentPassword,
+      newPassword,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Błąd zmiany hasła:', error?.response?.data || error.message);
+    throw error?.response?.data?.message || "Błąd zmiany hasła";
+  }
+};
+
 
 

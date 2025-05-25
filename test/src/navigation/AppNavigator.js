@@ -10,6 +10,8 @@ import MainTabsNavigator from '../navigation/MainTabsNavigator';
 
 import FolderDetailScreen from '../screens/FolderDetailScreen';
 
+import LearningScreen from '../screens/LearningScreen';
+
 const Stack = createNativeStackNavigator();
 
 function AppNavigator() {
@@ -51,6 +53,11 @@ function AppNavigator() {
         <Stack.Screen name="Progress Zone" component={ProgressZoneScreen} />
         <Stack.Screen name="User Account" component={UserAccountScreen} />
         */}
+
+        <Stack.Screen 
+          name="LearningScreen" 
+          component={LearningScreen} 
+        />
         
       </Stack.Navigator>
     </NavigationContainer>

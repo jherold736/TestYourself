@@ -9,6 +9,9 @@ import {
 } from 'react-native';
 import { getFolders } from '../api'; // chyba mam
 import { getStats } from '../api'; 
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
+
 
 const ProgressZoneScreen = ({ navigation }) => {
   const [folders, setFolders] = useState([]);
@@ -31,10 +34,11 @@ const ProgressZoneScreen = ({ navigation }) => {
   }, []);
 
   //pobieranie statystyk z bazy
-  useEffect(() => {
+useFocusEffect(
+  useCallback(() => {
     const fetchStats = async () => {
       try {
-        const stats = await getStats(); // { total: 123, today: 5 }
+        const stats = await getStats();
         setTotalRepetitions(stats.total || 0);
         setTodayRepetitions(stats.today || 0);
       } catch (err) {
@@ -43,7 +47,9 @@ const ProgressZoneScreen = ({ navigation }) => {
     };
 
     fetchStats();
-  }, []);
+  }, [])
+);
+
 
 
   //przejście do trybu nauki dla danego folderu

@@ -157,6 +157,14 @@ export const getStats = async () => {
 
   const data = await res.json();
   if (!res.ok) throw new Error(data.message);
-  return data;
+
+  const today = new Date().toISOString().split('T')[0];
+  const todayReps = data.repetitionsByDate?.[today] || 0;
+
+  return {
+    total: data.totalRepetitions || 0,
+    today: todayReps
+  };
 };
+
 

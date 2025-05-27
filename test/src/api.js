@@ -172,21 +172,11 @@ export const getStats = async () => {
 
 export const translateText = async (text) => {
   try {
-    const response = await fetch('https://libretranslate.com/translate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        q: text,
-        source: 'pl',
-        target: 'en',
-        format: 'text'
-      })
-    });
+    const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=pl|en`);
 
     const data = await response.json();
-    return data.translatedText;
+    console.log('Odpowiedź z API:', data); // LOG 3: Cała odpowiedź z serwera
+    return data.responseData.translatedText || '';
   } catch (err) {
     console.error('Błąd tłumaczenia:', err);
     return '';

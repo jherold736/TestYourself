@@ -11,6 +11,8 @@ import { getFolders } from '../api'; // chyba mam
 import { getStats } from '../api'; 
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
+import { translateText } from '../api';
+import { TextInput } from 'react-native';
 
 
 const ProgressZoneScreen = ({ navigation }) => {
@@ -18,6 +20,27 @@ const ProgressZoneScreen = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [totalRepetitions, setTotalRepetitions] = useState(0); //dodatkowe stany do statystyk
   const [todayRepetitions, setTodayRepetitions] = useState(0);
+  const [translatorVisible, setTranslatorVisible] = useState(false);
+  const [inputText, setInputText] = useState('');
+  const [translatedText, setTranslatedText] = useState('');
+
+//funkcja do tlumaczenia
+
+useEffect(() => {
+  const delayDebounce = setTimeout(async () => {
+    if (inputText.trim()) {
+      console.log('Tłumaczę:', inputText); // LOG 1: Co wpisano
+      const translated = await translateText(inputText);
+      console.log('Otrzymane tłumaczenie:', translated); // LOG 2: Co przyszło
+      setTranslatedText(translated);
+    } else {
+      setTranslatedText('');
+    }
+  }, 500); // mały delay by nie wysyłać żądania co literę
+
+  return () => clearTimeout(delayDebounce);
+}, [inputText]);
+
 
   //pobieranie folderow z bazy
   useEffect(() => {
@@ -60,6 +83,13 @@ useFocusEffect(
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity
+        style={styles.translatorButton}
+        onPress={() => setTranslatorVisible(true)}
+      >
+        <Text style={styles.translatorButtonText}>Tłumacz</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.studyButton} onPress={() => setModalVisible(true)}>
         <Text style={styles.studyText}>Strefa nauki</Text>
       </TouchableOpacity>
@@ -93,6 +123,33 @@ useFocusEffect(
             </ScrollView>
 
             <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
+              <Text style={styles.closeButtonText}>Zamknij</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+{/* Modal z tlumaczeniem */}
+
+      <Modal visible={translatorVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Tłumacz</Text>
+
+            <TextInput
+              placeholder="Wpisz słowo po polsku"
+              style={styles.input}
+              value={inputText}
+              onChangeText={setInputText}
+            />
+            <TextInput
+              placeholder="Tłumaczenie"
+              style={styles.input}
+              value={translatedText}
+              onChangeText={setTranslatedText} // umożliwia edycję
+            />
+
+            <TouchableOpacity onPress={() => setTranslatorVisible(false)} style={styles.closeButton}>
               <Text style={styles.closeButtonText}>Zamknij</Text>
             </TouchableOpacity>
           </View>
@@ -175,6 +232,27 @@ const styles = StyleSheet.create({
     color: '#000',
     fontWeight: '600',
     fontSize: 16,
+  },
+
+  translatorButton: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 20,
+    width: '85%',
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  translatorButtonText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#000',
+  },
+  input: {
+    backgroundColor: '#f2f2f2',
+    borderRadius: 10,
+    padding: 12,
+    fontSize: 16,
+    marginBottom: 10,
   },
 });
 

@@ -31,19 +31,24 @@ const LearningScreen = ({ route, navigation }) => {
 
   const currentCard = flashcards[currentIndex];
 
- const handleAnswer = async (isCorrect) => {
+const handleAnswer = async (isCorrect) => {
+  // Jeśli odpowiedź poprawna – zliczamy punkty
   if (isCorrect) {
     setCorrectCount((prev) => prev + 1);
-
-    const today = new Date().toISOString().split('T')[0];
-
-    try {
-      await updateStats(today, 1); // ⬅️ wysyłamy do bazy info o powtórzeniu fiszki
-    } catch (err) {
-      console.error('Błąd zapisu statystyk:', err);
-    }
   }
 
+  // UWAGA – tutaj została wprowadzona zmiana:
+  // Teraz zapisujemy statystyki ZAWSZE – niezależnie od tego,
+  // czy użytkownik odpowiedział dobrze czy źle.
+  const today = new Date().toISOString().split('T')[0];
+
+  try {
+    await updateStats(today, 1); // Dodajemy 1 powtórzenie bez względu na wynik
+  } catch (err) {
+    console.error('Błąd zapisu statystyk:', err);
+  }
+
+  // Przechodzimy do kolejnej fiszki albo kończymy
   if (currentIndex + 1 < flashcards.length) {
     setCurrentIndex((prev) => prev + 1);
   } else {

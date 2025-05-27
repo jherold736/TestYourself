@@ -42,13 +42,13 @@ const CreationZoneScreen = ({ navigation }) => {
                 back={card.back}
                 onUpdate={(front, back) => updateFlashcard(card.id, front, back)}
               />
-            </View>
-            <TouchableOpacity
-              style={styles.deleteButton}
-              onPress={() => deleteFlashcard(card.id)}
-            >
-              <Ionicons name="trash" size={30} color="black" />
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={() => deleteFlashcard(card.id)}
+              >
+                <Ionicons name="trash" size={30} color="black" />
             </TouchableOpacity>
+            </View>
           </View>
         ))}
 
@@ -84,6 +84,9 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     marginLeft: 10,
+    right: 5,
+    top: 10,
+
   },
   addButton: {
     marginVertical: 20,

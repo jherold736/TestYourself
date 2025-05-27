@@ -23,6 +23,7 @@ const ProgressZoneScreen = ({ navigation }) => {
   const [translatorVisible, setTranslatorVisible] = useState(false);
   const [inputText, setInputText] = useState('');
   const [translatedText, setTranslatedText] = useState('');
+  const [direction, setDirection] = useState('pl|en'); // domyślnie PL -> EN
 
 //funkcja do tlumaczenia
 
@@ -30,7 +31,7 @@ useEffect(() => {
   const delayDebounce = setTimeout(async () => {
     if (inputText.trim()) {
       console.log('Tłumaczę:', inputText); // LOG 1: Co wpisano
-      const translated = await translateText(inputText);
+      const translated = await translateText(inputText, direction);
       console.log('Otrzymane tłumaczenie:', translated); // LOG 2: Co przyszło
       setTranslatedText(translated);
     } else {
@@ -39,7 +40,7 @@ useEffect(() => {
   }, 500); // mały delay by nie wysyłać żądania co literę
 
   return () => clearTimeout(delayDebounce);
-}, [inputText]);
+}, [inputText, direction]);
 
 
   //pobieranie folderow z bazy
@@ -83,6 +84,8 @@ useFocusEffect(
 
   return (
     <View style={styles.container}>
+    {/* Przycisk do otwarcia tłumacza */}
+
       <TouchableOpacity
         style={styles.translatorButton}
         onPress={() => setTranslatorVisible(true)}
@@ -90,6 +93,17 @@ useFocusEffect(
         <Text style={styles.translatorButtonText}>Tłumacz</Text>
       </TouchableOpacity>
 
+ {/* Przycisk zmiany kierunku */}
+      <TouchableOpacity
+          onPress={() => setDirection((prev) => (prev === 'pl|en' ? 'en|pl' : 'pl|en'))}
+          style={styles.toggleButton}
+        >
+          <Text style={styles.toggleButtonText}>
+            {direction === 'pl|en' ? 'PL ➝ EN' : 'EN ➝ PL'}
+          </Text>
+        </TouchableOpacity>
+
+ {/* Strefa nauki */}
       <TouchableOpacity style={styles.studyButton} onPress={() => setModalVisible(true)}>
         <Text style={styles.studyText}>Strefa nauki</Text>
       </TouchableOpacity>
@@ -137,7 +151,7 @@ useFocusEffect(
             <Text style={styles.modalTitle}>Tłumacz</Text>
 
             <TextInput
-              placeholder="Wpisz słowo po polsku"
+              placeholder="Wpisz słowo"
               style={styles.input}
               value={inputText}
               onChangeText={setInputText}
@@ -254,6 +268,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 10,
   },
+  toggleButton: {
+    backgroundColor: '#eee',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    alignSelf: 'center',
+    marginBottom: 10,
+  },
+  toggleButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+
 });
 
 export default ProgressZoneScreen;

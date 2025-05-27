@@ -29,13 +29,13 @@ const MainTabsNavigator = () => {
         tabBarIcon: ({ color, size }) => {
           let iconName;
 
-          if (route.name === 'Creation Zone') {
+          if (route.name === 'Twórz') {
             iconName = 'create-outline';
-          } else if (route.name === 'Folders Zone') {
+          } else if (route.name === 'Foldery') {
             iconName = 'folder-outline';
-          } else if (route.name === 'Progress Zone') {
+          } else if (route.name === 'Progres') {
             iconName = 'bar-chart-outline';
-          } else if (route.name === 'User Account') {
+          } else if (route.name === 'Użytkownik') {
             iconName = 'person-outline';
           }
 
@@ -43,10 +43,10 @@ const MainTabsNavigator = () => {
         },
       })}
     >
-      <Tab.Screen name="Creation Zone" component={CreationZoneScreen} />
-      <Tab.Screen name="Folders Zone" component={FoldersZoneScreen} />
-      <Tab.Screen name="Progress Zone" component={ProgressZoneScreen} />
-      <Tab.Screen name="User Account" component={UserAccountScreen} />
+      <Tab.Screen name="Twórz" component={CreationZoneScreen} />
+      <Tab.Screen name="Foldery" component={FoldersZoneScreen} />
+      <Tab.Screen name="Progres" component={ProgressZoneScreen} />
+      <Tab.Screen name="Użytkownik" component={UserAccountScreen} />
     </Tab.Navigator>
   );
 };

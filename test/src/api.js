@@ -170,10 +170,11 @@ export const getStats = async () => {
 
 //API tlumaczeniowe
 
-export const translateText = async (text) => {
+export const translateText = async (text, direction = 'pl|en') => {
   try {
-    const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=pl|en`);
-
+    const response = await fetch(
+      `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${direction}`
+    );
     const data = await response.json();
     console.log('Odpowiedź z API:', data); // LOG 3: Cała odpowiedź z serwera
     return data.responseData.translatedText || '';

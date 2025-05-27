@@ -22,6 +22,7 @@ const jwt = require('jsonwebtoken');
 const Flashcard = require('./models/Flashcard'); // import modelu fiszki
 const Folder = require('./models/Folder');
 const app = express();
+const Stats = require('./models/Stats'); 
 
 app.use(express.json()); // Middleware do obsługi JSON
 
@@ -213,6 +214,39 @@ app.put('/change-password', auth, async (req, res) => {
     res.status(500).json({ message: 'Błąd zmiany hasła' });
   }
 });
+
+
+app.put('/stats/update', auth, async (req, res) => {
+  const userId = req.user._id;
+  const { date, count } = req.body;
+
+  try {
+    let stats = await Stats.findOne({ userId });
+    if (!stats) {
+      stats = new Stats({ userId });
+    }
+
+    stats.totalRepetitions += count;
+    stats.repetitionsByDate.set(date, (stats.repetitionsByDate.get(date) || 0) + count);
+
+    await stats.save();
+    res.json(stats);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Błąd zapisu statystyk' });
+  }
+});
+
+
+app.get('/stats/me', auth, async (req, res) => {
+  try {
+    const stats = await Stats.findOne({ userId: req.user._id });
+    res.json(stats || { totalRepetitions: 0, repetitionsByDate: {} });
+  } catch (err) {
+    res.status(500).json({ message: 'Błąd pobierania statystyk' });
+  }
+});
+
 
 // Ustawienie portu serwera
 const port = process.env.PORT || 3000;

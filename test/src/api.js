@@ -132,4 +132,31 @@ export const changePassword = async (currentPassword, newPassword) => {
 };
 
 
+export const updateStats = async (date, count) => {
+  const token = await AsyncStorage.getItem('token');
+  const response = await fetch(`${API_URL}/stats/update`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ date, count })
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message);
+  return data;
+};
+
+
+export const getStats = async () => {
+  const token = await AsyncStorage.getItem('token');
+  const res = await fetch(`${API_URL}/stats/me`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message);
+  return data;
+};
 

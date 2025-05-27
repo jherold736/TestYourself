@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import FlipCard from 'react-native-flip-card';
 import { Ionicons } from '@expo/vector-icons';
 import { getFlashcards } from '../api';
+import { updateStats } from '../api';
+
 
 const LearningScreen = ({ route, navigation }) => {
   const { folderName } = route.params;
@@ -29,14 +31,26 @@ const LearningScreen = ({ route, navigation }) => {
 
   const currentCard = flashcards[currentIndex];
 
-  const handleAnswer = (isCorrect) => {
-    if (isCorrect) setCorrectCount((prev) => prev + 1);
-    if (currentIndex + 1 < flashcards.length) {
-      setCurrentIndex((prev) => prev + 1);
-    } else {
-      setFinished(true);
+ const handleAnswer = async (isCorrect) => {
+  if (isCorrect) {
+    setCorrectCount((prev) => prev + 1);
+
+    const today = new Date().toISOString().split('T')[0];
+
+    try {
+      await updateStats(today, 1); // ⬅️ wysyłamy do bazy info o powtórzeniu fiszki
+    } catch (err) {
+      console.error('Błąd zapisu statystyk:', err);
     }
-  };
+  }
+
+  if (currentIndex + 1 < flashcards.length) {
+    setCurrentIndex((prev) => prev + 1);
+  } else {
+    setFinished(true);
+  }
+};
+
 
   const handleRestart = () => {
     setCurrentIndex(0);

@@ -8,11 +8,15 @@ import {
   StyleSheet
 } from 'react-native';
 import { getFolders } from '../api'; // chyba mam
+import { getStats } from '../api'; 
 
 const ProgressZoneScreen = ({ navigation }) => {
   const [folders, setFolders] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [totalRepetitions, setTotalRepetitions] = useState(0); //dodatkowe stany do statystyk
+  const [todayRepetitions, setTodayRepetitions] = useState(0);
 
+  //pobieranie folderow z bazy
   useEffect(() => {
     const fetchFolders = async () => {
       try {
@@ -26,6 +30,23 @@ const ProgressZoneScreen = ({ navigation }) => {
     fetchFolders();
   }, []);
 
+  //pobieranie statystyk z bazy
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const stats = await getStats(); // { total: 123, today: 5 }
+        setTotalRepetitions(stats.total || 0);
+        setTodayRepetitions(stats.today || 0);
+      } catch (err) {
+        console.error('Błąd pobierania statystyk:', err);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+
+  //przejście do trybu nauki dla danego folderu
   const handleSelectFolder = (folderName) => {
     setModalVisible(false);
     navigation.navigate('LearningScreen', { folderName }); // przejście do trybu nauki
@@ -36,6 +57,17 @@ const ProgressZoneScreen = ({ navigation }) => {
       <TouchableOpacity style={styles.studyButton} onPress={() => setModalVisible(true)}>
         <Text style={styles.studyText}>Strefa nauki</Text>
       </TouchableOpacity>
+
+      {/*Statystyki */}
+      <View style={styles.statsBox}>
+        <Text style={styles.statsTitle}>Całkowita ilość powtórzonych fiszek</Text>
+        <Text style={styles.statsValue}>{totalRepetitions}</Text>
+      </View>
+
+      <View style={styles.statsBox}>
+        <Text style={styles.statsTitle}>Ilość dzisiaj powtórzonych fiszek</Text>
+        <Text style={styles.statsValue}>{todayRepetitions}</Text>
+      </View>
 
       {/* Modal z listą folderów */}
       <Modal visible={modalVisible} transparent animationType="slide">
@@ -75,6 +107,30 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   studyText: { fontSize: 24, fontWeight: '700', color: '#000' },
+
+  //statystyki kontener
+
+  statsBox: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 20,
+    width: '85%',
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  statsTitle: {
+    fontSize: 16,
+    color: '#000',
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  statsValue: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#000',
+  },
+
+//modal
 
   modalOverlay: {
     flex: 1,

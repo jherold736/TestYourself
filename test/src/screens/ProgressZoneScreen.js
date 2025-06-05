@@ -204,10 +204,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statsTitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#000',
     fontWeight: '600',
     marginBottom: 8,
+    textAlign: 'center',
   },
   statsValue: {
     fontSize: 28,

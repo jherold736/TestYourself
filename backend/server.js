@@ -218,7 +218,7 @@ app.put('/change-password', auth, async (req, res) => {
 
 app.put('/stats/update', auth, async (req, res) => {
   const userId = req.user._id;
-  const { date, count } = req.body;
+  const { date, count, isCorrect } = req.body;
 
   try {
     let stats = await Stats.findOne({ userId });
@@ -227,6 +227,9 @@ app.put('/stats/update', auth, async (req, res) => {
     }
 
     stats.totalRepetitions += count;
+    if (isCorrect) {
+      stats.correctAnswers = (stats.correctAnswers || 0) + 1;
+    }
     stats.repetitionsByDate.set(date, (stats.repetitionsByDate.get(date) || 0) + count);
 
     await stats.save();

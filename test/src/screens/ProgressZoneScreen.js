@@ -20,6 +20,7 @@ const ProgressZoneScreen = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [totalRepetitions, setTotalRepetitions] = useState(0); //dodatkowe stany do statystyk
   const [todayRepetitions, setTodayRepetitions] = useState(0);
+  const [correctAnswers, setCorrectAnswers] = useState(0);
   const [translatorVisible, setTranslatorVisible] = useState(false);
   const [inputText, setInputText] = useState('');
   const [translatedText, setTranslatedText] = useState('');
@@ -65,6 +66,7 @@ useFocusEffect(
         const stats = await getStats();
         setTotalRepetitions(stats.total || 0);
         setTodayRepetitions(stats.today || 0);
+        setCorrectAnswers(stats.correct || 0);
       } catch (err) {
         console.error('Błąd pobierania statystyk:', err);
       }
@@ -118,6 +120,12 @@ useFocusEffect(
         <Text style={styles.statsTitle}>Ilość dzisiaj powtórzonych fiszek</Text>
         <Text style={styles.statsValue}>{todayRepetitions}</Text>
       </View>
+
+      <View style={styles.statsBox}>
+        <Text style={styles.statsTitle}>Całkowita liczba poprawnych odpowiedzi</Text>
+        <Text style={styles.statsValue}>{correctAnswers}</Text>
+      </View>
+
 
       {/* Modal z listą folderów */}
       <Modal visible={modalVisible} transparent animationType="slide">

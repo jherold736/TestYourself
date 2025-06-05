@@ -132,7 +132,7 @@ export const changePassword = async (currentPassword, newPassword) => {
 };
 
 
-export const updateStats = async (date, count) => {
+export const updateStats = async (date, count, isCorrect) => {
   const token = await AsyncStorage.getItem('token');
   const response = await fetch(`${API_URL}/stats/update`, {
     method: 'PUT',
@@ -140,7 +140,7 @@ export const updateStats = async (date, count) => {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ date, count })
+    body: JSON.stringify({ date, count, isCorrect })
   });
 
   const data = await response.json();
@@ -163,7 +163,8 @@ export const getStats = async () => {
 
   return {
     total: data.totalRepetitions || 0,
-    today: todayReps
+    today: todayReps,
+    correct: data.correctAnswers || 0
   };
 };
 

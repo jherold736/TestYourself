@@ -43,7 +43,7 @@ const handleAnswer = async (isCorrect) => {
   const today = new Date().toISOString().split('T')[0];
 
   try {
-    await updateStats(today, 1); // Dodajemy 1 powtórzenie bez względu na wynik
+    await updateStats(today, 1, isCorrect); // Dodajemy 1 powtórzenie bez względu na wynik
   } catch (err) {
     console.error('Błąd zapisu statystyk:', err);
   }

@@ -7,6 +7,10 @@ const statsSchema = new mongoose.Schema({
     type: Map,
     of: Number, // np. { "2025-05-26": 3 }
     default: {}
+  },
+  correctAnswers: {
+    type: Number,
+    default: 0
   }
 });
 

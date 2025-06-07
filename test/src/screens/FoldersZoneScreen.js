@@ -51,25 +51,30 @@ useEffect(() => {
 const addFolder = async () => {
   if (newFolderName.trim() !== '') {
     try {
-      // ➡️ 1. Zapis folderu do bazy danych:
+      // 1. Zapis folderu do bazy
       const savedFolder = await saveFolder(newFolderName);
       console.log('Folder zapisany do bazy:', savedFolder);
 
-      // ➡️ 2. Przygotowanie fiszek z folderName:
-      const flashcardsWithFolder = incomingFlashcards.map(card => ({
-        ...card,
-        folderName: savedFolder.name
-      }));
+      // 2. Sprawdź, czy mamy fiszki z CreationZone
+      const flashcardsWithFolder = incomingFlashcards
+        .filter(card => card.front && card.back)
+        .map(card => ({
+          ...card,
+          folderName: savedFolder.name,
+        }));
 
-      // ➡️ 3. Zapis fiszek do bazy:
-      await saveFlashcards(flashcardsWithFolder);
-      console.log(`Wysłano ${flashcardsWithFolder.length} fiszek do bazy`);
+      // 3. Jeśli są fiszki, zapisz je
+      if (flashcardsWithFolder.length > 0) {
+        await saveFlashcards(flashcardsWithFolder);
+        console.log(`Wysłano ${flashcardsWithFolder.length} fiszek do bazy`);
+        route.params.flashcards = []; // wyczyść po zapisaniu
+      }
 
-      // ➡️ 4. Dodajemy nowy folder do lokalnego state:
+      // 4. Dodaj folder lokalnie (tylko z fiszkami jeśli były)
       const newFolder = {
         _id: savedFolder._id,
         name: savedFolder.name,
-        flashcards: incomingFlashcards, // lokalny state, OK
+        ...(flashcardsWithFolder.length > 0 && { flashcards: flashcardsWithFolder }),
       };
 
       setFolders([...folders, newFolder]);
@@ -79,9 +84,11 @@ const addFolder = async () => {
 
     } catch (err) {
       console.error('Błąd przy zapisie folderu/fiszek:', err);
+      Alert.alert('Błąd', 'Nie udało się zapisać folderu lub fiszek.');
     }
   }
 };
+
 
   //  USUŃ FOLDER
 const deleteFolder = async (id) => {

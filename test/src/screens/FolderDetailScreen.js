@@ -63,11 +63,16 @@ const FolderDetailsScreen = ({ route }) => {
 
       console.log(' Dodaję fiszkę do folderu:', folderName);
 
-      setFlashcards(prev => [...prev, newCard]);
+      //setFlashcards(prev => [...prev, newCard]);
 
       try {
-        await saveFlashcards([newCard]); //  ZAPISZ DO BAZY
-        console.log('Nowa fiszka zapisana do bazy.');
+        const saved = await saveFlashcards([newCard]); // wysyłamy do bazy
+        console.log('Zapisano fiszki:', saved);
+
+    // Dodajemy do widoku TYLKO jeśli zapis się uda
+        const refreshed = await getFlashcards(folderName);
+        setFlashcards(refreshed);
+        console.log('Odświeżono fiszki:', refreshed);
       } catch (err) {
         console.error('Błąd zapisu fiszki:', err);
       }
